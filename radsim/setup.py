@@ -51,6 +51,7 @@ setup(
     name="radsim",
     packages=['radsim', ],
     scripts=[
+        'scripts/RADseqDigest.py',
     ],
     version=versioneer.get_version(),
     cmdclass=command_classes,
