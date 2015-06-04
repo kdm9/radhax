@@ -63,7 +63,8 @@ setup(
     url="https://github.com/kdmurray91/radhax",
     keywords=[
         "bioinformatics",
-        "SRA",
+        "RADseq",
+        "Genotyping by Sequencing",
         "Next-gen Sequencing",
     ],
     classifiers=[
