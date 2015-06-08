@@ -28,7 +28,8 @@ def test_digest_iter_fragments_simple():
     assert seq1 == 'CTGCAGacgtaCTGCAG', seq1
     assert seq2 == 'CTGCAGacgtCTGCAG', seq2
 
-def test_digest_iter_fragments_simple():
+
+def test_digest_iter_fragments_2_enzymes():
     '''Test the behaviour of Digest.iter_fragments() w/ 2 enzymes'''
     from radsim import Digest, Fragment
     from Bio.Restriction import PstI, EcoRV

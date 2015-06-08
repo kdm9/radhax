@@ -20,6 +20,7 @@ def list_enzymes(stream=sys.stderr):
 # Container for fragment iteration
 Fragment = namedtuple('Fragment', ['lhs', 'rhs', 'lhs_enzyme', 'rhs_enzyme'])
 
+
 class Digest(object):
     '''Class whose methods digest sequences, returning different formats'''
 
