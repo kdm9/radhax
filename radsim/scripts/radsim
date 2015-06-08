@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+from collections import Counter
+import docopt
+import screed
+import sys
+import textwrap
+from radsim import Digest
+
+
+CLI_ARGS = """
+USAGE:
+    radsim fasta [options] <genome> [<outfile>]
+    radsim bed [options] <genome> [<outfile>]
+    radsim hist [options] <genome> [<outfile>]
+
+OPTIONS:
+    -e ENZYME   Restriction enzyme name
+    -r ENZYME   Other Restriction enzyme name. If this option is given,
+                fragments must have this ('-r') enzyme at one end, and
+                the enzyme given with.
+    -n MIN      Minimum fragment length [default: 1]
+    -x MAX      Maximum fragment length [default: 10000]
+
+    radsim hist:
+        -b BINS     Number of bins in the histogram [default: 100]
+"""
+
+
+def output_frag_fasta(read, frag, stream):
+    print('>', read.name, '_', frag.lhs, '_', frag.rhs, sep='', file=stream)
+    seq = read.sequence[frag.lhs:frag.rhs]
+    for fa_line in textwrap.wrap(seq, width=79):
+        print(fa_line, file=stream)
+
+
+def output_frag_bed(read, frag, stream):
+    site_name = '{}[{}]_{}[{}]'.format(frag.lhs, frag.lhs_enzyme, frag.rhs,
+                                         frag.rhs_enzyme)
+    print(read.name, frag.lhs, frag.rhs, site_name, sep='\t', file=stream)
+
+
+def perror(*args, **kwargs):
+    '''Print an error to stderr, and exit with non-zero code.'''
+    print(file=sys.stderr, *args, **kwargs)
+    exit(1)
+
+
+def main(enzyme, r2_enzyme, genome, outfile, min_len, max_len, mode, n_bins):
+    '''Main loop of radsim.'''
+    digestor = Digest(enzyme, r2_enzyme)
+    if outfile == '-':
+        outstream = sys.stdout
+    else:
+        outstream = open(outfile, 'w')
+    fraglen_hist = Counter()
+    for read in screed.open(genome):
+        seq = read.sequence
+        for frag in digestor.iter_fragments(seq):
+            fraglen = frag.rhs - frag.lhs
+            if fraglen < min_len or fraglen > max_len:
+                continue
+            fraglen_hist[fraglen] += 1
+            if mode == 'fasta':
+                output_frag_fasta(read, frag, outstream)
+            elif mode == 'bed':
+                output_frag_bed(read, frag, outstream)
+    if mode == 'hist':
+        hist = Counter()
+        range_allowed = max_len -  min_len
+        for size, count in fraglen_hist.items():
+            bin = int(((size - min_len) / float(range_allowed)) * n_bins)
+            hist[bin] += count
+        binwidth = int(range_allowed / float(n_bins))
+        for bin, count in sorted(hist.items()):
+            # FIXME: Here be bugs
+            min_ = bin * binwidth + min_len
+            max_ = (bin + 1) * binwidth + min_len
+            range_str = "{}-{}".format(min_, max_)
+            print(bin, range_str, count, sep='\t', file=outstream)
+
+
+
+if __name__ == '__main__':
+    opts = docopt.docopt(CLI_ARGS)
+    enzyme = opts['-e']
+    r2_enzyme = opts['-r']
+    try:
+        min_len = int(opts['-n'])
+    except ValueError:
+        perror("Bad minimum length '", opts['-n'], "'", sep='')
+    try:
+        max_len = int(opts['-x'])
+    except ValueError:
+        perror("Bad maximum length '", opts['-x'], "'", sep='')
+    try:
+        n_bin = int(opts['-b'])
+    except ValueError:
+        perror("Bad number of bins: '", opts['-b'], "'", sep='')
+
+    if opts['fasta']:
+        mode = 'fasta'
+    elif opts['bed']:
+        mode = 'bed'
+    elif opts['hist']:
+        mode = 'hist'
+
+    genome = opts['<genome>']
+    outfile = opts['<outfile>']
+    if outfile is None:
+        outfile = '-'
+    main(enzyme, r2_enzyme, genome, outfile, min_len, max_len, mode, n_bin)
