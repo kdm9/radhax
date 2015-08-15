@@ -6,7 +6,7 @@ import docopt
 import screed
 import sys
 import textwrap
-from radsim import Digest
+from radsim import Digest, output_frag_fasta, output_frag_bed
 
 
 CLI_ARGS = """
@@ -27,18 +27,6 @@ OPTIONS:
         -b BINS     Number of bins in the histogram [default: 100]
 """
 
-
-def output_frag_fasta(read, frag, stream):
-    print('>', read.name, '_', frag.lhs, '_', frag.rhs, sep='', file=stream)
-    seq = read.sequence[frag.lhs:frag.rhs]
-    for fa_line in textwrap.wrap(seq, width=79):
-        print(fa_line, file=stream)
-
-
-def output_frag_bed(read, frag, stream):
-    site_name = '{}[{}]_{}[{}]'.format(frag.lhs, frag.lhs_enzyme, frag.rhs,
-                                         frag.rhs_enzyme)
-    print(read.name, frag.lhs, frag.rhs, site_name, sep='\t', file=stream)
 
 
 def perror(*args, **kwargs):

@@ -80,6 +80,27 @@ class Digest(object):
             yield fragment
 
 
+def output_frag_fasta(read, frag, stream, width=80):
+    print('>', read.name, '_', frag.lhs, '_', frag.rhs, sep='', file=stream)
+    seq = read.sequence[frag.lhs:frag.rhs]
+    for start in range(0, len(seq), width):
+        print(seq[start:start+width], file=stream)
+
+
+def output_frag_bed(read, frag, stream):
+    site_name = '{}[{}]_{}[{}]'.format(frag.lhs, frag.lhs_enzyme, frag.rhs,
+                                         frag.rhs_enzyme)
+    print(read.name, frag.lhs, frag.rhs, site_name, sep='\t', file=stream)
+
+
+
+def output_frag_reads(seq, frag, stream, mean_cov=200, rl=101, err_rate=0.001):
+    cov = np.random.poisson(200)
+    for frag in cov
+    print('>', read.name, '_', frag.lhs, '_', frag.rhs, sep='', file=stream)
+
+
+
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
