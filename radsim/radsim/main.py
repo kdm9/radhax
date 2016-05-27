@@ -1,7 +1,10 @@
 from __future__ import print_function, division, absolute_import
 from collections import Counter
 from argparse import ArgumentParser, FileType
+import sys
+
 import numpy as np
+
 from .digest import Digest
 from .utils import (
     output_frag_fasta,
@@ -12,10 +15,8 @@ from .utils import (
 
 
 def add_common_args(ap):
-    ap.add_argument('input', required=True, type=str,
+    ap.add_argument('input', type=str,
                     help='Genome sequence (in fasta format)')
-    ap.add_argument('output', required=True, type=FileType('w'),
-                    help='Output file')
     ap.add_argument('--enzyme', '-e', required=True,
                     help='Restriction enzyme name')
     ap.add_argument('--enzyme2', '-r', default=None,
@@ -33,6 +34,8 @@ def hist_main():
     ap = ArgumentParser(description="Create histogram of fragment sizes")
     add_common_args(ap)
     add_frag_len_args(ap)
+    ap.add_argument('output', type=FileType('w'), default=sys.stdout,
+                    help='Output file (default stdout)')
     ap.add_argument('--bins', '-b', type=int, default=100,
                     help='Number of bins in histogram')
     args = ap.parse_args()
@@ -54,18 +57,21 @@ def hist_main():
 
 def digest_main():
     ap = ArgumentParser(description="Performs in-silico digestion of a genome")
-    ap.add_argument("mode", type=str, choices=['fasta', 'bed'],
-                    help="Output format: fasta fragment sequences or bed of "
-                         "fragment genome intervals")
+    ap.add_argument('--fasta', type=FileType('w'),
+                    help="Fasta file to output fragment sequences")
+    ap.add_argument('--bed', type=FileType('w'),
+                    help="Bed file to output fragment sequences")
     add_common_args(ap)
     add_frag_len_args(ap)
     args = ap.parse_args()
+    if not (args.fasta or args.bed):
+        ap.error("One of --fasta FILE or --bed FILE is required")
     digestor = Digest(args.enzyme, args.enzyme2)
 
     frags = seqfile_iter_frags(args.input, digestor, minlen=args.min,
                                maxlen=args.max)
     for read, frag in frags:
-        if args.mode == 'fasta':
-            output_frag_fasta(read, frag, args.output)
-        else:
-            output_frag_bed(read, frag, args.output)
+        if args.fasta:
+            output_frag_fasta(read, frag, args.fasta)
+        if args.bed:
+            output_frag_bed(read, frag, args.bed)
