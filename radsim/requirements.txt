@@ -1,0 +1,6 @@
+numpy
+biopython
+docopt
+screed>=0.9
+six
+progressbar2

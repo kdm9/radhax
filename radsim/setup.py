@@ -12,14 +12,8 @@ setup_requires = [
     'pytest-runner',
 ]
 
-install_requires = [
-    'numpy',
-    'biopython',
-    'docopt',
-    'screed>=0.9',
-    'six',
-    'progressbar2',
-]
+with open('requirements.txt') as fh:
+    install_requires = [req.strip() for req in fh]
 
 test_requires = [
     'pep8',
