@@ -16,7 +16,7 @@ from .utils import (
 
 
 def add_common_args(ap):
-    ap.add_argument('input', type=str,
+    ap.add_argument('--genome', '-i', required=True, type=str,
                     help='Genome sequence (in fasta format)')
     ap.add_argument('--enzyme', '-e', required=True,
                     help='Restriction enzyme name')
@@ -35,7 +35,7 @@ def hist_main():
     ap = ArgumentParser(description="Create histogram of fragment sizes")
     add_common_args(ap)
     add_frag_len_args(ap)
-    ap.add_argument('output', type=FileType('w'), default=sys.stdout,
+    ap.add_argument('--output', '-o', type=FileType('w'), default=sys.stdout,
                     help='Output file (default stdout)')
     ap.add_argument('--bins', '-b', type=int, default=100,
                     help='Number of bins in histogram')
@@ -43,7 +43,7 @@ def hist_main():
     digestor = Digest(args.enzyme, args.enzyme2)
 
     sizes = []
-    frags = seqfile_iter_frags(args.input, digestor, minlen=args.min,
+    frags = seqfile_iter_frags(args.genome, digestor, minlen=args.min,
                                maxlen=args.max)
     for _, frag in frags:
         sizes.append(frag.len)
@@ -69,7 +69,7 @@ def digest_main():
         ap.error("One of --fasta FILE or --bed FILE is required")
     digestor = Digest(args.enzyme, args.enzyme2)
 
-    frags = seqfile_iter_frags(args.input, digestor, minlen=args.min,
+    frags = seqfile_iter_frags(args.genome, digestor, minlen=args.min,
                                maxlen=args.max)
     for read, frag in frags:
         if args.fasta:
@@ -82,13 +82,13 @@ def digest_main():
 
 def rebed_main():
     ap = ArgumentParser(description="Produces a BED file containing RE sites")
-    ap.add_argument('output', type=FileType('w'), default=sys.stdout,
+    ap.add_argument('--output', '-o', type=FileType('w'), default=sys.stdout,
                     help='Output file (default stdout)')
     add_common_args(ap)
     args = ap.parse_args()
     digest = Digest(args.enzyme, args.enzyme2)
 
-    for read in screed.open(args.input):
+    for read in screed.open(args.genome, parse_description=True):
         seq = read.sequence
         for cut, enz in digest.re_sites(seq):
-            output_bed(read.name, cut, cut + enz.size, enz.name, args.bed)
+            output_bed(read.name, cut, cut + enz.size, str(enz), args.output)
