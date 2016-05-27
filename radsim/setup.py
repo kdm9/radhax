@@ -1,25 +1,8 @@
+#!/usr/bin/env python
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
 import versioneer
 
-
-# Inspired by the example at https://pytest.org/latest/goodpractises.html
-class NoseCommand(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        # Run nose ensuring that argv simulates running nosetests directly
-        import nose
-        nose.run_exit(argv=['nosetests'])
-
-versioneer.VCS = 'git'
-versioneer.versionfile_source = 'radsim/_version.py'
-versioneer.versionfile_build = 'radsim/_version.py'
-versioneer.tag_prefix = 'radsim-'
-versioneer.parentdir_prefix = 'radsim-'
 
 desc = """
 RADsim: simulate reduced-represention sequencing platforms based on restriction
@@ -27,25 +10,24 @@ digestion, including RADseq and GBS.
 """
 
 setup_requires = [
-    'nose>=1.3',
+    'pytest-runner',
 ]
 
 install_requires = [
-    'biopython==1.65',
-    'docopt>=0.6',
-    'screed>=0.8',
-    'six>=1.9',
-    'progressbar2>=2.7',
+    'biopython',
+    'docopt',
+    'screed>=0.9',
+    'six',
+    'progressbar2',
 ]
 
 test_requires = [
-    'pep8>=1.6,<1.7',
-    'pylint>=1.4,<1.5',
-    'coverage>=3.7',
+    'pep8',
+    'pylint',
+    'pytest',
 ]
 
-command_classes=versioneer.get_cmdclass()
-command_classes['test'] =  NoseCommand
+command_classes = versioneer.get_cmdclass()
 
 setup(
     name="radsim",
@@ -78,7 +60,7 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
-        "License :: OSI Approved :: GNU General Public License v3 or later " +
-            "(GPLv3+)",
+        "License :: OSI Approved :: GNU General Public License v3 or later "
+        "(GPLv3+)",
     ],
 )
