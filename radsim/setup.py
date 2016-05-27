@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
 import versioneer
 
 
@@ -14,6 +13,7 @@ setup_requires = [
 ]
 
 install_requires = [
+    'numpy',
     'biopython',
     'docopt',
     'screed>=0.9',
@@ -32,10 +32,13 @@ command_classes = versioneer.get_cmdclass()
 setup(
     name="radsim",
     packages=['radsim', ],
-    scripts=[
-        'scripts/radsim',
-    ],
     version=versioneer.get_version(),
+    entry_points={
+        'console_scripts': [
+            'radsim-hist = radsim.main:hist_main',
+            'radsim-digest = radsim.main:digest_main',
+        ],
+    },
     cmdclass=command_classes,
     install_requires=install_requires,
     tests_require=test_requires,
@@ -47,6 +50,7 @@ setup(
     keywords=[
         "bioinformatics",
         "RADseq",
+        "GBS",
         "Genotyping by Sequencing",
         "Next-gen Sequencing",
     ],
