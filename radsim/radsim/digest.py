@@ -34,6 +34,19 @@ class Digest(object):
         self.r2_enzyme = r2_enzyme
         self.enzyme_set = list(set([enzyme, r2_enzyme]))
 
+    def re_sites(self, sequence):
+        seq = Seq(sequence, IUPACAmbiguousDNA)
+        # Set up analysis class with our enzymes and seq
+        rb = RestrictionBatch(self.enzyme_set)
+
+        # Do digest and reformat to dict of {site: enz, site:enz}
+        re_sites = {}
+        for enzyme, cutsites in rb.search(seq).items():
+            for cut in cutsites:
+                cut = cut + enzyme.fst3 - 1
+                re_sites[cut] = enzyme
+        return sorted(re_sites.items())
+
     def iter_fragments(self, sequence, strict=True, minlen=0,
                        maxlen=sys.maxsize):
         '''Digests ``sequence``, and returns all fragments bordered by sites.
@@ -49,38 +62,25 @@ class Digest(object):
         (first to include, first not to include)
         '''
         # TODO: enforce strictness
-        seq = Seq(sequence, IUPACAmbiguousDNA)
-        # Set up analysis class with our enzymes and seq
-        rb = RestrictionBatch(self.enzyme_set)
-
-        # Do digest and reformat to dict of {site: enz, site:enz}
-        re_sites = {}
-        for enzyme, cutsites in rb.search(seq).items():
-            for cut in cutsites:
-                re_sites[cut] = enzyme
 
         # loop through sites, yielding a Fragment for each
         last_enzyme = None
-        this_pair = None
-        for cut, enzyme in sorted(re_sites.items()):
+        last_start = None
+        for cut, enzyme in self.re_sites(sequence):
             # Special case for the first site
-            if this_pair is None:
-                this_pair = [None, cut + enzyme.fst3 - 1 + enzyme.size]
+            if last_enzyme is None:
+                last_start = cut
                 last_enzyme = enzyme
                 continue
-            # Switch time! this_pair[1] is the last cut site now.
 
-            # The first base of the previous RE site (which was stored as the
-            # rhs of a slice)
-            this_pair[0] = this_pair[1] - last_enzyme.size
-            # The first base not in the current RE site (rhs of the slice)
-            this_pair[1] = cut + enzyme.fst3 - 1 + enzyme.size
+            this_end = cut + enzyme.size
 
-            fraglen = this_pair[1] - this_pair[0]
+            fraglen = this_end - last_start
             # Create fragment before switch below
-            fragment = Fragment(lhs=this_pair[0], rhs=this_pair[1], len=fraglen,
+            fragment = Fragment(lhs=last_start, rhs=this_end, len=fraglen,
                                 lhs_enzyme=last_enzyme, rhs_enzyme=enzyme)
             last_enzyme = enzyme
+            last_start = cut
             if fraglen < minlen or fraglen > maxlen:
                 continue
             yield fragment
