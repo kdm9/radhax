@@ -17,11 +17,11 @@ def output_frag_fasta(read, frag, stream, width=80):
 
 
 def output_bed(name, start, stop, label, stream):
-    print(name, start + 1, stop, label, sep='\t', file=stream)
+    print(name, start, stop, label, sep='\t', file=stream)
 
 
 def seqfile_iter_frags(seqfile, digestor, minlen, maxlen):
-    for read in screed.open(seqfile):
+    for read in screed.open(seqfile, parse_description=True):
         seq = read.sequence
         for frag in digestor.iter_fragments(seq, minlen=minlen, maxlen=maxlen):
             yield read, frag
