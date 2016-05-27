@@ -19,7 +19,8 @@ def list_enzymes(stream=sys.stderr):
 
 
 # Container for fragment iteration
-Fragment = namedtuple('Fragment', ['lhs', 'rhs', 'lhs_enzyme', 'rhs_enzyme'])
+Fragment = namedtuple('Fragment', ['lhs', 'rhs', 'lhs_enzyme', 'rhs_enzyme',
+                                   'len'])
 
 
 class Digest(object):
@@ -33,7 +34,8 @@ class Digest(object):
         self.r2_enzyme = r2_enzyme
         self.enzyme_set = list(set([enzyme, r2_enzyme]))
 
-    def iter_fragments(self, sequence, strict=True):
+    def iter_fragments(self, sequence, strict=True, minlen=0,
+                       maxlen=sys.maxsize):
         '''Digests ``sequence``, and returns all fragments bordered by sites.
 
         if r2_enzyme is given, then only sites with ``enzyme`` at one end and
@@ -74,8 +76,11 @@ class Digest(object):
             # The first base not in the current RE site (rhs of the slice)
             this_pair[1] = cut + enzyme.fst3 - 1 + enzyme.size
 
+            fraglen = this_pair[1] - this_pair[0]
             # Create fragment before switch below
-            fragment = Fragment(lhs=this_pair[0], rhs=this_pair[1],
+            fragment = Fragment(lhs=this_pair[0], rhs=this_pair[1], len=fraglen,
                                 lhs_enzyme=last_enzyme, rhs_enzyme=enzyme)
             last_enzyme = enzyme
+            if fraglen < minlen or fraglen > maxlen:
+                continue
             yield fragment
