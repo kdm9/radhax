@@ -31,6 +31,7 @@ setup(
         'console_scripts': [
             'radsim-hist = radsim.main:hist_main',
             'radsim-digest = radsim.main:digest_main',
+            'radsim-rebed = radsim.main:rebed_main',
         ],
     },
     cmdclass=command_classes,
