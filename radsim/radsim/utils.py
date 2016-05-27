@@ -16,10 +16,8 @@ def output_frag_fasta(read, frag, stream, width=80):
         print(seq[start:start+width], file=stream)
 
 
-def output_frag_bed(read, frag, stream):
-    site_name = '{}[{}]_{}[{}]'.format(frag.lhs, frag.lhs_enzyme, frag.rhs,
-                                       frag.rhs_enzyme)
-    print(read.name, frag.lhs, frag.rhs, site_name, sep='\t', file=stream)
+def output_bed(name, start, stop, label, stream):
+    print(name, start + 1, stop, label, sep='\t', file=stream)
 
 
 def seqfile_iter_frags(seqfile, digestor, minlen, maxlen):

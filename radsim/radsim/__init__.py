@@ -7,7 +7,7 @@ from .digest import (
 )
 from .utils import (
     output_frag_fasta,
-    output_frag_bed,
+    output_bed,
 )
 from ._version import get_versions
 __version__ = get_versions()['version']

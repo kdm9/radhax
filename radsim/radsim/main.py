@@ -4,11 +4,12 @@ from argparse import ArgumentParser, FileType
 import sys
 
 import numpy as np
+import screed
 
 from .digest import Digest
 from .utils import (
     output_frag_fasta,
-    output_frag_bed,
+    output_bed,
     perror,
     seqfile_iter_frags,
 )
@@ -74,4 +75,20 @@ def digest_main():
         if args.fasta:
             output_frag_fasta(read, frag, args.fasta)
         if args.bed:
-            output_frag_bed(read, frag, args.bed)
+            site_name = '{}[{}]_{}[{}]'.format(frag.lhs, frag.lhs_enzyme,
+                                               frag.rhs, frag.rhs_enzyme)
+            output_bed(read.name, frag.lhs, frag.rhs, site_name, args.bed)
+
+
+def rebed_main():
+    ap = ArgumentParser(description="Produces a BED file containing RE sites")
+    ap.add_argument('output', type=FileType('w'), default=sys.stdout,
+                    help='Output file (default stdout)')
+    add_common_args(ap)
+    args = ap.parse_args()
+    digest = Digest(args.enzyme, args.enzyme2)
+
+    for read in screed.open(args.input):
+        seq = read.sequence
+        for cut, enz in digest.re_sites(seq):
+            output_bed(read.name, cut, cut + enz.size, enz.name, args.bed)
