@@ -1,2 +1,3 @@
 # Custom
-*.sw[po] # vi/vim
+# vi/vim
+*.sw[po]
