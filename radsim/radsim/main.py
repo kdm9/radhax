@@ -8,6 +8,7 @@ import screed
 
 from .digest import Digest
 from .utils import (
+    clamp,
     output_frag_fasta,
     output_bed,
     perror,
@@ -82,6 +83,8 @@ def digest_main():
 
 def rebed_main():
     ap = ArgumentParser(description="Produces a BED file containing RE sites")
+    ap.add_argument('--length', '-l', type=int, default=0, metavar='INT',
+                    help='Include a window of INT bases around each RE site in the output')
     ap.add_argument('--output', '-o', type=FileType('w'), default=sys.stdout,
                     help='Output file (default stdout)')
     add_common_args(ap)
@@ -90,5 +93,7 @@ def rebed_main():
 
     for read in screed.open(args.genome, parse_description=True):
         seq = read.sequence
+        seql = len(read.sequence)
         for cut, enz in digest.re_sites(seq):
-            output_bed(read.name, cut, cut + enz.size, str(enz), args.output)
+            output_bed(read.name, clamp(cut-args.length, 0, seql),
+                    clamp(cut + enz.size+args.length, 0, seql), str(enz), args.output)

@@ -1,6 +1,5 @@
 from __future__ import print_function, division, absolute_import
 from Bio.Seq import Seq
-from Bio.Alphabet.IUPAC import IUPACAmbiguousDNA
 from Bio import Restriction
 from Bio.Restriction import Analysis, RestrictionBatch
 from collections import namedtuple
@@ -35,7 +34,7 @@ class Digest(object):
         self.enzyme_set = list(set([enzyme, r2_enzyme]))
 
     def re_sites(self, sequence):
-        seq = Seq(sequence, IUPACAmbiguousDNA)
+        seq = Seq(sequence)
         # Set up analysis class with our enzymes and seq
         rb = RestrictionBatch(self.enzyme_set)
 

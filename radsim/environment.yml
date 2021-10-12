@@ -1,0 +1,11 @@
+name: radsim
+channels:
+  - bioconda
+  - conda-forge
+dependencies:
+  - numpy
+  - biopython
+  - docopt
+  - screed
+  - six
+  - progressbar2

@@ -25,3 +25,7 @@ def seqfile_iter_frags(seqfile, digestor, minlen, maxlen):
         seq = read.sequence
         for frag in digestor.iter_fragments(seq, minlen=minlen, maxlen=maxlen):
             yield read, frag
+
+
+def clamp(n, mn, mx):
+    return max(min(n, mx), mn)
