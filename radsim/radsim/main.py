@@ -75,12 +75,12 @@ def digest_main():
     frags = seqfile_iter_frags(args.genome, digestor, minlen=args.min,
                                maxlen=args.max, force_different_enzymes=args.ddrad)
     for read, frag in frags:
-        if args.fasta:
-            output_frag_fasta(read, frag, args.fasta)
-        if args.bed:
+        if args.output_fasta:
+            output_frag_fasta(read, frag, args.output_fasta)
+        if args.output_bed:
             site_name = '{}[{}]_{}[{}]'.format(frag.lhs, frag.lhs_enzyme,
                                                frag.rhs, frag.rhs_enzyme)
-            output_bed(read.name, frag.lhs, frag.rhs, site_name, args.bed)
+            output_bed(read.name, frag.lhs, frag.rhs, site_name, args.output_bed)
 
 
 def rebed_main():
