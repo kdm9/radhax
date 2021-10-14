@@ -46,21 +46,20 @@ class Digest(object):
                 re_sites[cut] = enzyme
         return sorted(re_sites.items())
 
-    def iter_fragments(self, sequence, strict=True, minlen=0,
+    def iter_fragments(self, sequence, force_different_enzymes=True, minlen=0,
                        maxlen=sys.maxsize):
         '''Digests ``sequence``, and returns all fragments bordered by sites.
 
         if r2_enzyme is given, then only sites with ``enzyme`` at one end and
         ``r2_enzyme`` at the other are returned. Otherwise, all fragments are
-        returned. If ``strict`` is False, all fragments are returned in any
-        case.
+        returned. If ``force_different_enzymes`` is False, all fragments are
+        returned in any case.
 
         Returns fragments as a ``Fragment``.
 
         lhs/rhs are python slice intervals, i.e.:
         (first to include, first not to include)
         '''
-        # TODO: enforce strictness
 
         # loop through sites, yielding a Fragment for each
         last_enzyme = None
@@ -75,11 +74,13 @@ class Digest(object):
             this_end = cut + enzyme.size
 
             fraglen = this_end - last_start
+            if fraglen < minlen or fraglen > maxlen:
+                continue
+            if force_different_enzymes and self.r2_enzyme is not None and self.enzyme != self.r2_enzyme and last_enzyme == enzyme:
+                continue
             # Create fragment before switch below
             fragment = Fragment(lhs=last_start, rhs=this_end, len=fraglen,
                                 lhs_enzyme=last_enzyme, rhs_enzyme=enzyme)
             last_enzyme = enzyme
             last_start = cut
-            if fraglen < minlen or fraglen > maxlen:
-                continue
             yield fragment

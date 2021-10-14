@@ -59,19 +59,21 @@ def hist_main():
 
 def digest_main():
     ap = ArgumentParser(description="Performs in-silico digestion of a genome")
-    ap.add_argument('--fasta', type=FileType('w'),
+    ap.add_argument('--output-fasta', type=FileType('w'),
                     help="Fasta file to output fragment sequences")
-    ap.add_argument('--bed', type=FileType('w'),
+    ap.add_argument('--output-bed', type=FileType('w'),
                     help="Bed file to output fragment sequences")
+    ap.add_argument('--ddrad', action="store_true",
+                    help="Enforce different enzymes on each end of the frament.")
     add_common_args(ap)
     add_frag_len_args(ap)
     args = ap.parse_args()
-    if not (args.fasta or args.bed):
-        ap.error("One of --fasta FILE or --bed FILE is required")
+    if not (args.output_fasta or args.output_bed):
+        ap.error("One of --output-fasta FILE or --output-bed FILE is required")
     digestor = Digest(args.enzyme, args.enzyme2)
 
     frags = seqfile_iter_frags(args.genome, digestor, minlen=args.min,
-                               maxlen=args.max)
+                               maxlen=args.max, force_different_enzymes=args.ddrad)
     for read, frag in frags:
         if args.fasta:
             output_frag_fasta(read, frag, args.fasta)

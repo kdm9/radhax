@@ -20,10 +20,10 @@ def output_bed(name, start, stop, label, stream):
     print(name, start, stop, label, sep='\t', file=stream)
 
 
-def seqfile_iter_frags(seqfile, digestor, minlen, maxlen):
+def seqfile_iter_frags(seqfile, digestor, minlen, maxlen, **kwargs):
     for read in screed.open(seqfile, parse_description=True):
         seq = read.sequence
-        for frag in digestor.iter_fragments(seq, minlen=minlen, maxlen=maxlen):
+        for frag in digestor.iter_fragments(seq, minlen=minlen, maxlen=maxlen, **kwargs):
             yield read, frag
 
 
