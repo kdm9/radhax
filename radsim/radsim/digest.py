@@ -75,8 +75,12 @@ class Digest(object):
 
             fraglen = this_end - last_start
             if fraglen < minlen or fraglen > maxlen:
+                last_enzyme = enzyme
+                last_start = cut
                 continue
             if force_different_enzymes and self.r2_enzyme is not None and self.enzyme != self.r2_enzyme and last_enzyme == enzyme:
+                last_enzyme = enzyme
+                last_start = cut
                 continue
             # Create fragment before switch below
             fragment = Fragment(lhs=last_start, rhs=this_end, len=fraglen,
